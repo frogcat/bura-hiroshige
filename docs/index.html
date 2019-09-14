@@ -40,8 +40,8 @@
   <div id="log"></div>
   <script>
     var map = L.map("map", L.extend({
-      zoom: 15,
-      center: [35.6707, 139.7852],
+      zoom: 17,
+      center: [35.68398, 139.77448],
       maxZoom: 20
     }, L.Hash.parseHash(location.hash)));
 
@@ -100,8 +100,8 @@
         maxNativeZoom: 18,
         maxZoom: 20
       }),
-      "MapWarper日本橋": L.tileLayer("https://mapwarper.net/maps/tile/41996/{z}/{x}/{y}.png",{
-        attribution:"<a href='http://dl.ndl.go.jp/info:ndljp/pid/2542361'>MapWarper日本橋</a>"
+      "MapWarper日本橋": L.tileLayer("https://mapwarper.net/maps/tile/41996/{z}/{x}/{y}.png", {
+        attribution: "<a href='http://dl.ndl.go.jp/info:ndljp/pid/2542361'>MapWarper日本橋</a>"
       })
     }).addTo(map);
 
@@ -168,6 +168,8 @@ WHERE {
         });
       });
     });
+
+    map.fire("moveend");
   </script>
 </body>
 
