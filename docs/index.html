@@ -215,11 +215,36 @@ WHERE {
                 html: html
               })
             }).addTo(group);
-            L.marker([lat, lon]).bindPopup("<pre>" + JSON.stringify(x, null, 2) + "</pre>").addTo(group);
+            //            L.marker([lat, lon]).bindPopup("<pre>" + JSON.stringify(x, null, 2) + "</pre>").addTo(group);
           }
         });
       });
     });
+
+
+    fetch('https://script.google.com/macros/s/AKfycbzLOxGaJZ8vmSzOp1cPrzmDLxIE2OHRVQpjcCAeWM3vK0mPl8Ls/exec').then(a => a.json()).then(data => {
+      data.forEach(obj => {
+
+        if (obj.url === "https://jpsearch.go.jp/item/arc_nishikie-0421_C088")
+          obj.img = "https://data.ukiyo-e.org/metro/scaled/0421-C088.jpg";
+        var html = "<h2>" + obj.label + "</h2><p>" + obj.description + "</p><p><a href='" + obj.url + "' target='blank'>リンク</a></p>";
+        if (obj.img)
+          html += "<img src='" + obj.img + "' style='width:200px'/>";
+        L.marker([obj.lat, obj.long]).bindPopup(html).addTo(map);
+      });
+    });
+    /*    , function(data) {
+
+          for (var i = 0; i < data.length; i++) {
+            var obj = data[i]
+
+            if (obj.lat != "") {
+              L.marker([obj.lat, obj.long]).addTo(map)
+                .bindPopup().openPopup();
+            }
+          }
+        });
+    */
 
     map.fire("moveend");
   </script>
