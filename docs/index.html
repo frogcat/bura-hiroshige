@@ -32,80 +32,132 @@
       color: white;
       z-index: 2000;
     }
+
+    #foot button {
+      width: 100px;
+      background: black;
+      border: 2px solid white;
+      border-radius: 5px;
+      color: white;
+      text-align: center;
+      height: 36px;
+      margin: 2px;
+      font-size: 20pt;
+    }
+
+    #foot button:active {
+      background: orange;
+    }
   </style>
 </head>
 
 <body>
-  <div id="map" style="position:absolute;top:0;left:0;bottom:0;right:0;"></div>
+  <div id="map" style="position:absolute;top:0;left:0;bottom:40px;right:0;"></div>
+  <div id="foot" style="position:absolute;left:0;bottom:0;right:0;height:40px;text-align:center;background:black;">
+    <button id="prev">過去</button>
+    <span id="time" style="color:white;font-size:18pt;">#</span>
+    <button id="next">未来</button>
+  </div>
   <div id="log"></div>
   <script>
     var map = L.map("map", L.extend({
       zoom: 17,
       center: [35.68398, 139.77448],
-      maxZoom: 20
+      maxZoom: 20,
+      zoomControl: false
     }, L.Hash.parseHash(location.hash)));
 
-    L.control.layers({
-      "淡色地図": L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
-        attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>",
-        maxZoom: 20
-      }).addTo(map),
-      "古地図": L.tileLayer("http://www.finds.jp/ws/tmc/1.0.0/Kanto_Rapid-900913-L/{z}/{x}/{y}.png", {
+    var layers = [
+      L.tileLayer("https://mapwarper.net/maps/tile/41996/{z}/{x}/{y}.png", {
+        attribution: "<a href='http://dl.ndl.go.jp/info:ndljp/pid/2542361'>MapWarper日本橋</a>",
+        maxNativeZoom: 18,
+        maxZoom: 20,
+        title: "江戸"
+      }),
+      L.tileLayer("http://www.finds.jp/ws/tmc/1.0.0/Kanto_Rapid-900913-L/{z}/{x}/{y}.png", {
         attribution: "<a href='https://habs.dc.affrc.go.jp'>歴史的農業環境閲覧システム</a>",
         maxNativeZoom: 17,
-        maxZoom: 20
+        maxZoom: 20,
+        title: "明治"
       }),
-      "1936年ごろ": L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/ort_riku10/{z}/{x}/{y}.png", {
+      L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/ort_riku10/{z}/{x}/{y}.png", {
         attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>",
         maxNativeZoom: 18,
-        maxZoom: 20
+        maxZoom: 20,
+        title: "1936年"
       }),
-      "1945-1950年ごろ": L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/ort_USA10/{z}/{x}/{y}.png", {
+      L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/ort_USA10/{z}/{x}/{y}.png", {
         attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>",
         maxNativeZoom: 17,
-        maxZoom: 20
+        maxZoom: 20,
+        title: "1945-1950年"
       }),
-      "1961-1969年ごろ": L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/ort_old10/{z}/{x}/{y}.png", {
+      L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/ort_old10/{z}/{x}/{y}.png", {
         attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>",
         maxNativeZoom: 17,
-        maxZoom: 20
+        maxZoom: 20,
+        title: "1961-1969年"
       }),
-      "1974-1978年ごろ": L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/gazo1/{z}/{x}/{y}.jpg", {
+      L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/gazo1/{z}/{x}/{y}.jpg", {
         attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>",
         maxNativeZoom: 17,
-        maxZoom: 20
+        maxZoom: 20,
+        title: "1974-1978年"
       }),
-      "1979-1983年ごろ": L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/gazo2/{z}/{x}/{y}.jpg", {
+      L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/gazo2/{z}/{x}/{y}.jpg", {
         attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>",
         maxNativeZoom: 17,
-        maxZoom: 20
+        maxZoom: 20,
+        title: "1979-1983年"
       }),
-      "1984-1986年ごろ": L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/gazo3/{z}/{x}/{y}.jpg", {
+      L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/gazo3/{z}/{x}/{y}.jpg", {
         attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>",
         maxNativeZoom: 17,
-        maxZoom: 20
+        maxZoom: 20,
+        title: "1984-1986年"
       }),
-      "1988-1990年ごろ": L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/gazo4/{z}/{x}/{y}.jpg", {
+      L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/gazo4/{z}/{x}/{y}.jpg", {
         attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>",
         maxNativeZoom: 17,
-        maxZoom: 20
-      }),
-      "2004年": L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/airphoto/{z}/{x}/{y}.png", {
+        maxZoom: 20,
+        title: "1988-1990年"
+      }), L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/airphoto/{z}/{x}/{y}.png", {
         attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>",
         maxNativeZoom: 18,
-        maxZoom: 20
+        maxZoom: 20,
+        title: "2004年"
       }),
-      "2007年": L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/ort/{z}/{x}/{y}.jpg", {
+      L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/ort/{z}/{x}/{y}.jpg", {
         attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>",
         maxNativeZoom: 18,
-        maxZoom: 20
+        maxZoom: 20,
+        title: "2007年"
       }),
-      "MapWarper日本橋": L.tileLayer("https://mapwarper.net/maps/tile/41996/{z}/{x}/{y}.png", {
-        attribution: "<a href='http://dl.ndl.go.jp/info:ndljp/pid/2542361'>MapWarper日本橋</a>"
+      L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
+        attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>",
+        maxZoom: 20,
+        title: "現在"
       })
-    }).addTo(map);
+    ];
 
-    map.zoomControl.setPosition("bottomright");
+    var current = null;
+
+    var position = 0;
+    $("#prev").click(function() {
+      position = Math.max(position - 1, 0);
+      if (current) map.removeLayer(current);
+      current = layers[position];
+      current.addTo(map);
+      $("#time").text(current.options.title);
+    }).click();
+
+    $("#next").click(function() {
+      position = Math.min(position + 1, layers.length - 1);
+      if (current) map.removeLayer(current);
+      current = layers[position];
+      current.addTo(map);
+      $("#time").text(current.options.title);
+    });
 
     L.control.scale({
       imperial: false,
