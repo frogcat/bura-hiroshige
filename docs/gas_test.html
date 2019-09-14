@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Quick Start - Leaflet</title>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+        integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
+        crossorigin=""></script>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+
+
+</head>
+
+<body style="width: 100%; height: 600px;    ">
+
+
+
+    <div id="mapid" style="width: 100%; height: 100%;"></div>
+    <script>
+
+        var mymap = L.map('mapid').setView([35.6743, 139.7442], 13);
+
+        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+            maxZoom: 18,
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+                '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+                'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            id: 'mapbox.streets'
+        }).addTo(mymap);
+
+        $.getJSON('https://script.google.com/macros/s/AKfycbzLOxGaJZ8vmSzOp1cPrzmDLxIE2OHRVQpjcCAeWM3vK0mPl8Ls/exec', function (data) {
+
+                for(var i = 0; i < data.length; i++){
+                    var obj = data[i]
+
+                    if(obj.lat != ""){
+                        L.marker([obj.lat, obj.long]).addTo(mymap)
+                            .bindPopup("<h2>" + obj.label + "</h2><p>" + obj.description+"</p><iframe width='300px' height='400px' src='"+obj.url+"'/>").openPopup();
+                    }
+
+                    
+                }
+
+                
+            });
+
+
+
+    </script>
+
+
+
+</body>
+
+</html>
