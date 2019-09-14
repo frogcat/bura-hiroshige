@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>leaflet-boilerplate</title>
+  <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-hash@0.2.1/leaflet-hash.js"></script>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <style>
+    .leaflet-control-container::after {
+      content: url(https://maps.gsi.go.jp/image/map/crosshairs.png);
+      z-index: 1000;
+      display: block;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .wikidata {
+      white-space: nowrap;
+      width: auto;
+      height: auto;
+      background: orange;
+      border: 1px solid black;
+    }
+
+    .wikidata.jps {
+      background: red;
+    }
+
+    #log {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: auto;
+      height: auto;
+      background: black;
+      color: white;
+      z-index: 2000;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map" style="position:absolute;top:0;left:0;bottom:0;right:0;"></div>
+  <div id="log"></div>
+  <script>
+    var map = L.map("map", L.extend({
+      zoom: 15,
+      center: [35.6707, 139.7852]
+    }, L.Hash.parseHash(location.hash)));
+
+    L.control.layers({
+      "淡色地図": L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
+        attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>"
+      }).addTo(map),
+      "過去": L.tileLayer("http://www.finds.jp/ws/tmc/1.0.0/Kanto_Rapid-900913-L/{z}/{x}/{y}.png", {
+        attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>"
+      }),
+      "色別標高図": L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png", {
+        attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>"
+      }),
+      "OpenStreetMap": L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
+      })
+    }).addTo(map);
+
+    map.zoomControl.setPosition("bottomright");
+
+    L.control.scale({
+      imperial: false,
+      metric: true
+    }).addTo(map);
+
+    L.hash(map);
+
+    var group = L.layerGroup().addTo(map);
+
+
+    map.on("moveend", function() {
+      var bounds = map.getBounds();
+
+      var sparql =
+        `SELECT ?place ?placeLabel ?location
+WHERE {
+  SERVICE wikibase:box {
+    ?place wdt:P625 ?location.
+    bd:serviceParam wikibase:cornerWest "Point(${bounds.getWest()} ${bounds.getNorth()})"^^geo:wktLiteral.
+    bd:serviceParam wikibase:cornerEast "Point(${bounds.getEast()} ${bounds.getSouth()})"^^geo:wktLiteral.
+  }
+  optional {
+    ?place wdt:P6698 ?jps
+  }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "ja". }
+}`;
+
+      group.clearLayers();
+
+      var time = new Date().getTime();
+      $("#log").text("loading");
+
+      fetch(
+        "https://query.wikidata.org/sparql?query=" + encodeURIComponent(sparql), {
+          "headers": {
+            "accept": "application/sparql-results+json"
+          },
+          "method": "GET",
+          "mode": "cors"
+        }).then(a => a.json()).then(a => {
+
+        var cost = (new Date().getTime()) - time;
+        $("#log").text(a.results.bindings.length + " records in " + cost + " msec");
+
+        a.results.bindings.forEach(x => {
+          if (x.location.value.match(/^Point\((.+) (.+)\)$/)) {
+            var lon = parseFloat(RegExp.$1);
+            var lat = parseFloat(RegExp.$2);
+
+            var html = "<span class='wikidata'>" + x.placeLabel.value + "</span>";
+            if (a.jps) html = html.replace('wikidata', 'wikidata jps');
+            L.marker([lat, lon], {
+              icon: L.divIcon({
+                html: html
+              })
+            }).addTo(group);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>
