@@ -48,6 +48,34 @@
     #foot button:active {
       background: orange;
     }
+
+
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-tip {
+      background: black;
+      border-color: white;
+    }
+
+    .leaflet-popup-content,
+    a.leaflet-popup-close-button {
+      color: white !important;
+      font: bold 14pt monospace;
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-width: 3px;
+      border-style: solid;
+    }
+
+    .leaflet-popup-tip-container {
+      margin-top: -3px;
+      height: 23px;
+    }
+
+    .leaflet-popup-tip {
+      border-style: solid;
+      border-width: 0 3px 3px 0;
+    }
   </style>
 </head>
 
@@ -222,12 +250,40 @@ WHERE {
     });
 
 
+    const replacement = {
+      "http://dl.ndl.go.jp/info:ndljp/pid/3459985/72": "https://www.dl.ndl.go.jp/api/iiif/3459985/F0000072/full/full/0/default.jpg",
+      "http://dl.ndl.go.jp/info:ndljp/pid/3459985/71": "https://www.dl.ndl.go.jp/api/iiif/3459985/F0000071/full/full/0/default.jpg",
+      "http://dl.ndl.go.jp/info:ndljp/pid/3459985/66": "https://www.dl.ndl.go.jp/api/iiif/3459985/F0000066/full/full/0/default.jpg",
+      "https://jpsearch.go.jp/item/arc_nishikie-0421_C088": "https://data.ukiyo-e.org/metro/scaled/0421-C088.jpg",
+      "https://colbase.nich.go.jp/uploads/collection_item_images/thumbnail/ab93544af90290aba6381f4d60ebb2f2.jpg": "https://colbase.nich.go.jp/uploads/collection_item_images/thumbnail/ab93544af90290aba6381f4d60ebb2f2.jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/8/87/Nihonbashi_after_Great_Kanto_earthquake.JPG": "https://upload.wikimedia.org/wikipedia/commons/8/87/Nihonbashi_after_Great_Kanto_earthquake.JPG",
+      "https://upload.wikimedia.org/wikipedia/commons/8/84/NewlyBuilt_Nihonbashi_1911_Tokyo.jpg": "https://upload.wikimedia.org/wikipedia/commons/8/84/NewlyBuilt_Nihonbashi_1911_Tokyo.jpg"
+    };
+
+
     fetch('https://script.google.com/macros/s/AKfycbzLOxGaJZ8vmSzOp1cPrzmDLxIE2OHRVQpjcCAeWM3vK0mPl8Ls/exec').then(a => a.json()).then(data => {
       data.forEach(obj => {
+        if (replacement[obj.url]) {
+          obj.img = replacement[obj.url];
+        } else if (obj.url.indexOf("http://dl.ndl.go.jp/info:ndljp/pid/") === 0) {
+          const a = obj.url.replace("http://dl.ndl.go.jp/info:ndljp/pid/", "").split("/");
+          if (a.length === 2) {
+            n = ("" + (1000 + parseInt(a[1]))).substring(1);
+            obj.img = "https://www.dl.ndl.go.jp/api/iiif/" + a[0] + "/F0000" + n + "/full/full/0/default.jpg";
+            console.log(a[1], n, obj.img);
+          }
+        } else if (obj.url.indexOf("https://upload.wikimedia.org/") === 0) {
+          obj.img = obj.url;
+        } else if (obj.description.indexOf("日本橋雪晴") !== -1) {
+          obj.img = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/100_views_edo_001.jpg/398px-100_views_edo_001.jpg";
+        } else if (obj.description.indexOf("日本橋江戸ばし") !== -1) {
+          obj.img = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/100_views_edo_043.jpg/395px-100_views_edo_043.jpg";
+        } else if (obj.description.indexOf("富嶽三十六景 江戸日本橋") !== -1) {
+          obj.img = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Nihonbashi_bridge_in_Edo.jpg/320px-Nihonbashi_bridge_in_Edo.jpg";
+        }
 
-        if (obj.url === "https://jpsearch.go.jp/item/arc_nishikie-0421_C088")
-          obj.img = "https://data.ukiyo-e.org/metro/scaled/0421-C088.jpg";
-        var html = "<h2>" + obj.label + "</h2><p>" + obj.description + "</p><p><a href='" + obj.url + "' target='blank'>リンク</a></p>";
+        //        var html = "<h2>" + obj.description + "</h2><p>" + obj.description + "</p><p><a href='" + obj.url + "' target='blank'>リンク</a></p>";
+        var html = "<h4>" + obj.description + "</h4><p><a href='" + obj.url + "' target='blank'>リンク</a></p>";
         if (obj.img)
           html += "<img src='" + obj.img + "' style='width:200px'/>";
         L.marker([obj.lat, obj.long]).bindPopup(html).addTo(map);
