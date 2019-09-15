@@ -88,6 +88,9 @@
   </div>
   <div id="log"></div>
   <script>
+    var lang = "ja";
+    if (location.search.match(/^\?([a-zA-Z_]+)$/)) lang = RegExp.$1;
+
     var map = L.map("map", L.extend({
       zoom: 17,
       center: [35.68398, 139.77448],
@@ -211,7 +214,7 @@ WHERE {
   optional {
     ?place wdt:P6698 ?jps
   }
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "ja". }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "${lang}". }
 }`;
 
       group.clearLayers();
@@ -236,6 +239,7 @@ WHERE {
             var lon = parseFloat(RegExp.$1);
             var lat = parseFloat(RegExp.$2);
 
+            if (x.placeLabel.value.match(/^Q[0-9]+$/)) console.log(x.placeLabel.value);
             var html = "<span class='wikidata'>" + x.placeLabel.value + "</span>";
             if (a.jps) html = html.replace('wikidata', 'wikidata jps');
             L.marker([lat, lon], {
@@ -270,7 +274,6 @@ WHERE {
           if (a.length === 2) {
             n = ("" + (1000 + parseInt(a[1]))).substring(1);
             obj.img = "https://www.dl.ndl.go.jp/api/iiif/" + a[0] + "/F0000" + n + "/full/full/0/default.jpg";
-            console.log(a[1], n, obj.img);
           }
         } else if (obj.url.indexOf("https://upload.wikimedia.org/") === 0) {
           obj.img = obj.url;
