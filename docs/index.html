@@ -265,6 +265,29 @@ WHERE {
     };
 
 
+    fetch("data.txt").then(a => a.text()).then(a => {
+      const rows = a.split("\n").map(b => b.split("\t"));
+      const points = [];
+      rows.forEach(col => {
+        var lat = parseFloat(col[5]);
+        var lon = parseFloat(col[6]);
+        if (isNaN(lat) || isNaN(lon)) return;
+
+        points.push(L.latLng(lat, lon));
+
+        var html = "<div>";
+        html += "<h4>" + col[3] + "</h4>";
+        html += "<p>" + col[4] + "</p>";
+        html += "<p>" + col[7] + "</p>";
+        if (col[8].indexOf('http') === 0)
+          html += "<img src='" + col[8] + "' width='240px'/>";
+        html += "</div>";
+        L.marker([lat, lon]).bindPopup(html).addTo(map);
+      });
+
+//      L.polyline(points).addTo(map);
+    });
+
     fetch('https://script.google.com/macros/s/AKfycbzLOxGaJZ8vmSzOp1cPrzmDLxIE2OHRVQpjcCAeWM3vK0mPl8Ls/exec').then(a => a.json()).then(data => {
       data.forEach(obj => {
         if (replacement[obj.url]) {
@@ -289,7 +312,7 @@ WHERE {
         var html = "<h4>" + obj.description + "</h4><p><a href='" + obj.url + "' target='blank'>リンク</a></p>";
         if (obj.img)
           html += "<img src='" + obj.img + "' style='width:200px'/>";
-        L.marker([obj.lat, obj.long]).bindPopup(html).addTo(map);
+        L.circleMarker([obj.lat, obj.long]).bindPopup(html).addTo(map);
       });
     });
     /*    , function(data) {
